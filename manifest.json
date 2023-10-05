@@ -1,17 +1,19 @@
 {
-    "manifest_version": 3,
-    "name": "Saatva Chatbot",
+    "manifest_version": 2,
+    "name": "ChatBot Extension",
     "version": "1.0",
-    "description": "A Chrome extension chatbot to \"talk to\" Saatva's website, particularly its product pages. Uses Chrome's sidePanel as its distinguishing UI/UX feature",
-    "author": "Jayant Raj",
-    "permissions": ["activeTab", "storage", "sidePanel"],
+    "description": "A chatbot extension",
+    "permissions": [
+      "activeTab"
+    ],
     "background": {
-        "service_worker": "background.js",
-        "type": "module"
+      "scripts": [
+        "background.js"
+      ]
     },
-    "action": {
+    "browser_action": {
       "default_popup": "popup.html",
-      "default_title": "Saatva Chatbot Extension"
+      "default_title": "ChatBot Extension"
     }
   }
   

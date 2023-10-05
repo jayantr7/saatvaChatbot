@@ -1,0 +1,34 @@
+import openai
+import configparser
+
+# Load API key from config.ini
+config = configparser.ConfigParser()
+config.read('config.ini')
+openai.api_key = config['openai']['api_key']
+
+def chat_with_chatbot(message):
+    try:
+        response = openai.ChatCompletion.create(
+            engine="gpt-3.5-turbo",
+            prompt=message,
+            max_tokens=50,
+            temperature=0.3,
+        )
+        return response['choices'][0]['message']['content']
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
+
+# Example conversation
+conversation = """
+User: Hello, bot!
+Bot: Hi, how can I assist you today?
+"""
+
+while True:
+    user_input = input("User: ")
+    conversation += f"\nUser: {user_input}"
+    bot_response = chat_with_chatbot(conversation)
+    conversation += f"\nBot: {bot_response}"
+    print("Bot:", bot_response)

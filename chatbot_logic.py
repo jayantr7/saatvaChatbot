@@ -1,5 +1,5 @@
-def chat_with_chatbot(conversation):
+def chat_with_chatbot(conversation, currentURL):
     # For testing purposes, a simple example response is provided
-    response = "This is a test response from the chatbot"
+    response = "Current URL is: " + str(currentURL)
 
     return response

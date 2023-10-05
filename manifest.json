@@ -4,7 +4,12 @@
   "version": "1.0",
   "description": "SaatvaAI, a chatbot extension to \"talk\" to the Saatva website and its products",
   "permissions": [
-    "activeTab", "sidePanel"
+    "activeTab", 
+    "sidePanel", 
+    "tabs",
+    "storage",
+    "webNavigation", 
+    "webRequest"
   ],
   "background": {
     "service_worker": "background.js"

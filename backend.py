@@ -5,13 +5,16 @@ from flask import make_response
 from chatbot_logic import chat_with_chatbot
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['CORS_HEADERS'] = 'Content-Type'
 @app.route('/chatbot', methods=['POST'])
 def chatbot():
+    print("Full request payload:", request.json)
     conversation = request.json['conversation']
-    print("Received:", conversation)  # Debugging line
-    response_text = chat_with_chatbot(conversation)
+    activeTabURL = request.json['url']
+    print("Received conversation:", conversation)  # Debugging line
+    print("Received URL:", activeTabURL)  # Debugging line
+    response_text = chat_with_chatbot(conversation, activeTabURL)
     print("Sending:", response_text)  # Debugging line
 
     response = make_response(jsonify({'response': response_text}), 200)

@@ -1,19 +1,16 @@
 {
-    "manifest_version": 2,
-    "name": "ChatBot Extension",
-    "version": "1.0",
-    "description": "A chatbot extension",
-    "permissions": [
-      "activeTab"
-    ],
-    "background": {
-      "scripts": [
-        "background.js"
-      ]
-    },
-    "browser_action": {
-      "default_popup": "popup.html",
-      "default_title": "ChatBot Extension"
-    }
+  "manifest_version": 3,
+  "name": "SaatvaAI",
+  "version": "1.0",
+  "description": "SaatvaAI, a chatbot extension to \"talk\" to the Saatva website and its products",
+  "permissions": [
+    "activeTab", "sidePanel"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "ChatBot Extension"
   }
-  
+}

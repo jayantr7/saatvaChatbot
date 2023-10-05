@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 from flask import make_response
+from chatbot_logic import chat_with_chatbot
 
 app = Flask(__name__)
 CORS(app)
@@ -17,15 +18,6 @@ def chatbot():
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     response.headers["Access-Control-Allow-Credentials"] = "true"
-
-    return response
-
-def chat_with_chatbot(conversation):
-    # Your existing code for interacting with the OpenAI API goes here
-    # Modify it as necessary to extract the response from the model
-
-    # For testing purposes, a simple example response is provided
-    response = "This is a test response from the chatbot"
 
     return response
 

@@ -15,7 +15,7 @@ def chatbot():
     screenGrab = request.json['screenGrab']
     print("Received conversation:", conversation)  # Debugging line
     print("Received URL:", activeTabURL)  # Debugging line
-    print("Received screen grab of the active page (first 15 chars):", screenGrab[:15])
+    #print("Received screen grab of the active page (first 15 chars):", screenGrab[:15])
     response_text = chat_with_chatbot(conversation, activeTabURL, screenGrab)
     print("Sending:", response_text)  # Debugging line
 

@@ -1,3 +1,7 @@
+### GOAL: take in input and send out response ###
+###       INPUT: chat_with_chatbot(userPrompt, currentURL, currScreenHTMLContent) is called from the outside ###
+###       OUTPUT: a string is sent to the caller (bot reply) ###
+###       However I change the code, I need to keep this in mind ###
 import openai
 import configparser
 import os

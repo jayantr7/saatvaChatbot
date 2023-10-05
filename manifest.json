@@ -9,6 +9,9 @@
   "background": {
     "service_worker": "background.js"
   },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_title": "ChatBot Extension"

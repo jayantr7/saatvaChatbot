@@ -12,9 +12,11 @@ def chatbot():
     print("Full request payload:", request.json)
     conversation = request.json['conversation']
     activeTabURL = request.json['url']
+    screenGrab = request.json['screenGrab']
     print("Received conversation:", conversation)  # Debugging line
     print("Received URL:", activeTabURL)  # Debugging line
-    response_text = chat_with_chatbot(conversation, activeTabURL)
+    print("Received screen grab of the active page (first 15 chars):", screenGrab[:15])
+    response_text = chat_with_chatbot(conversation, activeTabURL, screenGrab)
     print("Sending:", response_text)  # Debugging line
 
     response = make_response(jsonify({'response': response_text}), 200)

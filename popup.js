@@ -24,15 +24,21 @@ document.addEventListener("DOMContentLoaded", function() {
       var activeTabURL = activeTab.url;
       console.log("Active tab URL:", activeTabURL);  // Debugging line
 
-      // Construct message object to send to backend
-      var messageObject = {
-        conversation: userMessage,
-        url: activeTabURL
-      };
+      chrome.scripting.executeScript({
+        target: {tabId: activeTab.id},
+        function: grabContent
+      }, (results) => {
+        var screenGrab = results[0].result;
 
-      // Send message to chatbot and handle response
-      chat_with_chatbot(messageObject, function(chatbotResponse) {
-        conversation.innerHTML += "<p>Chatbot: " + chatbotResponse + "</p>";
+        var messageObject = {
+          conversation: userMessage,
+          url: activeTabURL,
+          screenGrab: screenGrab
+        };
+
+        chat_with_chatbot(messageObject, function(chatbotResponse) {
+          conversation.innerHTML += "<p>Chatbot: " + chatbotResponse + "</p>";
+        });
       });
     });
   });
@@ -51,3 +57,7 @@ document.addEventListener("DOMContentLoaded", function() {
     .catch((error) => console.error("An error occurred:", error));
   }
 });
+
+function grabContent() {
+  return document.body.innerHTML;
+}

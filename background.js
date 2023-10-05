@@ -24,9 +24,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   }
 });
 
-
-
-
 chrome.action.onClicked.addListener(function() {
   chrome.tabs.create({ url: chrome.runtime.getURL("popup.html") });
 });

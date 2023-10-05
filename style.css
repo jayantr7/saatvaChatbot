@@ -1,0 +1,92 @@
+
+/* Existing styles for body, input, and button */
+body {
+  width: 300px;
+  padding: 10px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+h2 {
+  text-align: center;
+  font-family: 'Georgia', serif;  /* or any other font you find suitable */
+}
+
+#conversation {
+  flex: 0.92;
+  overflow: auto;
+  border: 2px solid #bababa;
+  padding: 4px;
+  font-family: 'Times New Roman', serif;
+}
+#user-input {
+  margin-top: 10px;
+  width: 96%;
+  padding: 5px;
+}
+#submit-button {
+  margin-top: 10px;
+  width: 100%;
+  padding: 5px;
+}
+
+/* Styles for user and chatbot messages */
+.user-message, .chatbot-message {
+  border: 1px solid #5e5e5e;
+  padding: 15px;
+  margin: 5px;
+  border-radius: 20px;
+  position: relative;
+}
+
+/* Different backgrounds for user and chatbot */
+.user-message {
+  background-color: #e6f6fb;
+  border-bottom-right-radius: 0;
+}
+.chatbot-message {
+  background-color: #f7e2e5;
+  border-bottom-left-radius: 0;
+}
+
+/* Font styling */
+.user-label {
+  background-color: #eff8fa;
+  padding: 2px 4px;
+  border-radius: 12px;
+}
+
+.chatbot-label {
+  background-color: #fbf3f4;
+  padding: 2px 4px;
+  border-radius: 12px;
+}
+
+/* Speech bubble tails with better style */
+/* For the User */
+.user-message:after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  border-width: 5px 0 5px 9px;
+  border-style: solid;
+  border-color: transparent #71acfe transparent transparent;
+  width: 0;
+  height: 0;
+}
+
+/* For the Chatbot */
+.chatbot-message:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-width: 5px 5px 9px 0;
+  border-style: solid;
+  border-color: transparent transparent transparent #f7647a;
+  width: 0;
+  height: 0;
+}

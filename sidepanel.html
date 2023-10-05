@@ -1,36 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>SaatvaAI Chatbot Extension</title>
-        <style>
-          body {
-            width: 300px;
-            padding: 10px;
-          }
-          #conversation {
-            height: 195px;
-            overflow: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-          }
-          #user-input {
-            margin-top: 10px;
-            width: 95%;
-            padding: 5px;
-          }
-          #submit-button {
-            margin-top: 10px;
-            width: 100%;
-            padding: 5px;
-          }
-        </style>
-      </head>
-      <body>
-        <div id="conversation">
-        </div>
-        <input id="user-input" type="text" placeholder="Enter your message here">
-        <button id="submit-button">Send</button>
-        <script src="popup.js"></script>
-      </body>
+  <head>
+    <meta charset="UTF-8">
+    <title>SaatvaAI Chatbot Extension</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <h2>SaatvaAI Assistant</h1>
+    <div id="conversation">
+    </div>
+    <input id="user-input" type="text" placeholder="Talk to SaatvaAI here">
+    <button id="submit-button">Send</button>
+    <script src="popup.js"></script>
+  </body>
 </html>

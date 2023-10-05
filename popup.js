@@ -14,8 +14,11 @@ document.addEventListener("DOMContentLoaded", function() {
   submitButton.addEventListener("click", function() {
     console.log("Submit button clicked");  // Debugging line
     var userMessage = userInput.value;
-    conversation.innerHTML += "<p>User: " + userMessage + "</p>";
+    conversation.innerHTML += `<div class="user-message"><span class="user-label"><strong>User:</strong></span> ${userMessage}</div>`;
     userInput.value = "";
+
+    // Scroll to the bottom
+    conversation.scrollTop = conversation.scrollHeight;
 
     // Get the URL of the active tab
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
@@ -37,7 +40,9 @@ document.addEventListener("DOMContentLoaded", function() {
         };
 
         chat_with_chatbot(messageObject, function(chatbotResponse) {
-          conversation.innerHTML += "<p>Chatbot: " + chatbotResponse + "</p>";
+          conversation.innerHTML += `<div class="chatbot-message"><span class="chatbot-label"><strong>SaatvaAI:</strong></span> ${chatbotResponse}</div>`;
+          // Scroll to the bottom again
+          conversation.scrollTop = conversation.scrollHeight;
         });
       });
     });
@@ -61,3 +66,11 @@ document.addEventListener("DOMContentLoaded", function() {
 function grabContent() {
   return document.body.innerHTML;
 }
+
+function scrollToBottom() {
+  const conversationDiv = document.getElementById("conversation");
+  conversationDiv.scrollTop = conversationDiv.scrollHeight;
+}
+
+// Call this function every time a new message is added.
+scrollToBottom();

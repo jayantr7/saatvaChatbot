@@ -18,13 +18,9 @@ import openai
 import numpy as np
 from openai.embeddings_utils import distances_from_embeddings, cosine_similarity
 from ast import literal_eval
-import spacy
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
 # Regex pattern to match a URL
-#HTTP_URL_PATTERN = r'^https://www\.saatva\.com(/(mattresses|furniture|bedding)/.*|/?)$'
-HTTP_URL_PATTERN = r'^https://www\.saatva\.com/furniture/minori/$'
+HTTP_URL_PATTERN = r'^https://www\.saatva\.com(/(mattresses|furniture|bedding)/.*|/?)$'
 
 # Define OpenAI api_key
 openai.api_key = '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'
@@ -99,7 +95,7 @@ def get_domain_hyperlinks(local_domain, url):
 
         # If the link is not a URL, check if it is a relative link
         else:
-            if link.startswith("/furniture/minori/"):
+            if link.startswith("/"):
                 clean_link = "https://" + local_domain + link
 
         if clean_link is not None:
@@ -148,25 +144,21 @@ def crawl(url):
         try:
             # Save text from the url to a <url>.txt file
             with open('text/'+local_domain+'/'+url[8:].replace("/", "_") + ".txt", "w", encoding="UTF-8") as f:
-                html_content = requests.get(url).text
+
                 # Get the text from the URL using BeautifulSoup
-                soup = BeautifulSoup(html_content, "html.parser")
-                clean_html_content = re.sub(r'<.*?>|function|var|return|for|while|if|else|document|window|class|style|[^\w\s.,!?;]', ' ', html_content)
-                #clean_html_content_2 = re.sub(r'<(/?)(html|body|head|link|meta|script|style|div|span|p|br|h[1-6]|ul|ol|li|a|img|input|button|form|nav|footer|header|table|tr|td|th|em|strong|i|b|u|s|del|ins|q|code|pre|blockquote|dl|dt|dd|hr|small|sub|sup|big|address|tt|kbd|samp|var|cite|dfn|abbr|acronym|fieldset|legend|optgroup|option|textarea|label|select|caption|colgroup|col|area|map|dir|base|basefont|applet|param|object|!--|font|noframes|center|noframe|iframe|xml|rss|![CDATA[|article|aside|details|figcaption|figure|time|mark|ruby|rt|rp|section|summary|wbr|command|datagrid|datalist|keygen|output|progress|meter|audio|video|source|canvas|track|datalist|article|main|figure|picture|figcaption|details|menu|menuitem|summary|content|decorator|element|shadow|template|acronym|applet|bgsound|blink|dir|frameset|frame|noframes|isindex|keygen|listing|xmp|nextid|noembed|plaintext|rb|strike|basefont|big|blink|center|font|marquee|multicol|nobr|spacer|tt|rtc)--?>|<!--.*?-->|function|var|let|const|return|for|while|do|switch|case|break|continue|if|else|else if|true|false|null|undefined|NaN|Infinity|eval|parseInt|parseFloat|isNaN|isFinite|decodeURI|decodeURIComponent|encodeURI|encodeURIComponent|escape|unescape|Object|Array|String|Number|Boolean|Symbol|Date|Promise|RegExp|Error|EvalError|RangeError|ReferenceError|SyntaxError|TypeError|URIError|Math|JSON|console|window|document|navigator|history|location|screen|alert|confirm|prompt|print|setTimeout|setInterval|clearTimeout|clearInterval|requestAnimationFrame|cancelAnimationFrame|fetch|XMLHttpRequest|ActiveXObject|Worker|SharedWorker|navigator|Blob|FileReader|localStorage|sessionStorage|indexedDB|caches|applicationCache|crypto|performance|customElements|style|cssText|length|parentRule|getPropertyValue|removeProperty|getPropertyPriority|setProperty|getPropertyCSSValue|[@!?$%^&*=~\|<>]+','', html_content)
+                soup = BeautifulSoup(requests.get(url).text, "html.parser")
 
                 # Get the text but remove the tags
                 text = soup.get_text()
 
                 # If the crawler gets to a page that requires JavaScript, it will stop the crawl
-                #if ("You need to enable JavaScript to run this app." in text):
-                #    print("Unable to parse page " + url + " due to JavaScript being required")
+                if ("You need to enable JavaScript to run this app." in text):
+                    print("Unable to parse page " + url + " due to JavaScript being required")
             
                 # Otherwise, write the text to the file in the text directory
-                combined_content = f"{url}---HTML Content---\n{clean_html_content}\n---Text Content---\n{text}"
-                f.write(combined_content)
+                f.write(text)
         except Exception as e:
             print("Unable to parse page " + url)
-            print(e)
 
         # Get the hyperlinks from the URL and add them to the queue
         for link in get_domain_hyperlinks(local_domain, url):
@@ -233,18 +225,11 @@ df.n_tokens.hist()
 ### Step 8
 ################################################################################
 
-max_tokens = 2000
-
+max_tokens = 500
 
 # Function to split the text into chunks of a maximum number of tokens
 def split_into_many(text, max_tokens = max_tokens):
-    #nlp = spacy.load("en_core_web_sm", disable=["tagger", "parser", "ner"])
-    #nlp.max_length = 2000000
-    #nlp.add_pipe('sentencizer')
-    #doc = nlp(text)
-    #sentences = [sent.text for sent in doc.sents]
-    
-    
+
     # Split the text into sentences
     sentences = text.split('. ')
 
@@ -368,10 +353,10 @@ def answer_question(
     df,
     model="text-davinci-003",
     question=" ",
-    max_len=2000,
+    max_len=1800,
     size="ada",
     debug=False,
-    max_tokens=2000,
+    max_tokens=500,
     stop_sequence=None
 ):
     """
@@ -411,4 +396,4 @@ def answer_question(
 
 #print(answer_question(df, question="What day is it?", debug=False))
 
-print(answer_question(df, question="What is the best mattress? What price ranges?"))
+print(answer_question(df, question="What kind of mattresses are available? What price ranges?"))

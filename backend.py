@@ -9,10 +9,10 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-##########################################
-##########################################
-##########################################
-##########################################
+##########FROM CHATBOT_LOGIC.PY (BROUGHT HERE TO AVOID HASSLE FOR THE TIME BEING)################################
+#################################################################################################################
+#################################################################################################################
+#################################################################################################################
 ### GOAL: take in input and send out response ###
 ###       INPUT: chat_with_chatbot(userPrompt, currentURL, currScreenHTMLContent) is called from the outside ###
 ###       OUTPUT: a string is sent to the caller (bot reply) ###
@@ -59,6 +59,11 @@ conversation = ConversationChain(
 )
 
 urlsVisited = []
+messagesToResponder = [
+            {"role":"system", "content": "You take the response from a text embedding bot (text-davinci-002) that is answering a question that the Saatva ecommerce website user has and entering in a chatbot. The text embedding response is more technical and weird. So you act as the middleman to craft a better sounding reply to the user's query."},
+            {"role":"system", "content": "So the user in this context is the text embedding bot that is taking user's query and sending out a response."},
+            {"role":"system", "content": "The user role replies where the message starts from \'CUSTOMER:\' is the actual customer's prompt or question. The user role replies where the message starts from \'DAVINCI:\' is the text embedding bot's reply. If the bot's response doesn't answer the question properly or wholly, use your discretion to fill in the blanks. To the customer, the responses look like they come from you. So don't write \'DAVINCI:\' at the start of your response."}
+            ]
 
 # Define ConversationBufferMemory class
 class ConversationBufferMemory:
@@ -148,7 +153,7 @@ def chat_with_chatbot(userPrompt, currentURL, currScreenHTMLContent):
         max_len=1800,
         size="ada",
         debug=False,
-        max_tokens=500,
+        max_tokens=1000,
         stop_sequence=None
     ):
         context = create_context(
@@ -180,11 +185,26 @@ def chat_with_chatbot(userPrompt, currentURL, currScreenHTMLContent):
         
         return response["choices"][0]["text"].strip()
         
-    answer = answer_question(df, question=userPrompt, debug=False)
+    answerFromDavinci = answer_question(df, question=userPrompt, debug=False)
     
     # Save the bot's answer to memory
-    memory.add_message('bot', answer)
+    memory.add_message('bot', answerFromDavinci)
     
+    ###### RESPONDER BOT LOGIC ######
+    def chatgpt_call_with_memory(messagesToResponder, model="gpt-3.5-turbo"):
+        responseFromResponder = openai.ChatCompletion.create(
+            model=model,
+            messages=messagesToResponder
+        )
+        return responseFromResponder.choices[0].message["content"]
+    messagesToResponder.append({"role":"user", "content":f"CUSTOMER: {userPrompt}"})
+    messagesToResponder.append({"role":"user", "content":f"DAVINCI: {answerFromDavinci}"})
+    answer = chatgpt_call_with_memory(messagesToResponder)
+    messagesToResponder.append({"role":"assistant", "content":f"{answer}"})
+    #################################
+
+    print("DAVINCI: ", answerFromDavinci, "\n")
+    print("RESPONDER: ", answer, "\n")
     return answer
 ##########################################
 ##########################################

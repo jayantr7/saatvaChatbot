@@ -4,6 +4,8 @@ document.addEventListener("DOMContentLoaded", function() {
   var userInput = document.getElementById("user-input");
   var submitButton = document.getElementById("submit-button");
 
+  addIntroMessage();
+
   userInput.addEventListener("keyup", function(event) {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -102,3 +104,8 @@ window.addEventListener("load", function () {
   iconImage.style.height = fontSize/4 + "px";
   iconImage.style.width = fontSize/4 + "px";
 });
+
+function addIntroMessage() {
+  const welcomeMessage = 'Hi! I am SaatvaAI, a friendly shopping assistant for the Saatva product catalogue. Feel free to ask me anything about our products.';  // Customize this message as needed
+  conversation.innerHTML += `<div class="chatbot-message"><span class="chatbot-label"><strong>SaatvaAI:</strong></span> ${welcomeMessage}</div>`;
+}

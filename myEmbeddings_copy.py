@@ -4,6 +4,7 @@
 ### Step 1
 ################################################################################
 
+import configparser
 import requests
 import re
 import urllib.request
@@ -20,10 +21,18 @@ from openai.embeddings_utils import distances_from_embeddings, cosine_similarity
 from ast import literal_eval
 
 # Regex pattern to match a URL
-HTTP_URL_PATTERN = r'^https://www\.saatva\.com(/(mattresses|furniture|bedding)/.*|/?)$'
+#HTTP_URL_PATTERN = r'^https://www\.saatva\.com(/(mattresses|furniture|bedding)/.*|/?)$'
+HTTP_URL_PATTERN = r'^https://www\.saatva\.com/(mattresses|furniture|bedding)/$ # only match the three categories'
 
-# Define OpenAI api_key
-openai.api_key = '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'
+# Load API key from config.ini
+config = configparser.ConfigParser()
+try:
+    config.read('config.ini')
+except Exception as e:
+    print("An error occurred:", e)
+
+openai.api_key = config['openai']['api_key']
+os.environ["OPENAI_API_KEY"] = config['openai']['api_key']
 
 # Define root domain to crawl
 domain = "saatva.com"
@@ -144,13 +153,21 @@ def crawl(url):
         try:
             # Save text from the url to a <url>.txt file
             with open('text/'+local_domain+'/'+url[8:].replace("/", "_") + ".txt", "w", encoding="UTF-8") as f:
-
+                response1 = requests.get(url)
+                response_as_string = str(response1.content)  # Convert the entire Response object's content to a string
+                clean_html_content = re.sub(r'<.*?>|function|var|return|for|while|if|else|document|window|class|style|[^\w\s.,!?;]', ' ', response_as_string)
+                clean_html = re.sub(r'<.*?>', ' ', clean_html_content)
+                js_keywords = r'\b(function|var|let|const|return|for|while|do|switch|case|break|continue|if|else|true|false|null|undefined)\b'
+                clean_js = re.sub(js_keywords, ' ', clean_html)
+                css_keywords = r'\b(style|color|background|border|margin|padding|font)\b'
+                clean_css = re.sub(css_keywords, ' ', clean_js)
+                clean_special_chars = re.sub(r'[^\w\s.,!?;]', ' ', clean_css)
                 # Get the text from the URL using BeautifulSoup
-                soup = BeautifulSoup(requests.get(url).text, "html.parser")
+                #soup = BeautifulSoup(requests.get(url).text, "html.parser")
 
                 # Get the text but remove the tags
                 text = str("WEBPAGE: "+ str(url)+ "\n")
-                text = text + soup.get_text()
+                text = text + clean_special_chars
 
                 # If the crawler gets to a page that requires JavaScript, it will stop the crawl
                 if ("You need to enable JavaScript to run this app." in text):

@@ -4,6 +4,7 @@
 ### Step 1
 ################################################################################
 
+import configparser
 import requests
 import re
 import urllib.request
@@ -26,8 +27,15 @@ from selenium.webdriver.chrome.options import Options
 #HTTP_URL_PATTERN = r'^https://www\.saatva\.com(/(mattresses|furniture|bedding)/.*|/?)$'
 HTTP_URL_PATTERN = r'^https://www\.saatva\.com/furniture/minori/$'
 
-# Define OpenAI api_key
-openai.api_key = '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'
+# Load API key from config.ini
+config = configparser.ConfigParser()
+try:
+    config.read('config.ini')
+except Exception as e:
+    print("An error occurred:", e)
+
+openai.api_key = config['openai']['api_key']
+os.environ["OPENAI_API_KEY"] = config['openai']['api_key']
 
 # Define root domain to crawl
 domain = "saatva.com"

@@ -17,6 +17,12 @@ from langchain.chains import RetrievalQA
 from bs4 import BeautifulSoup
 from langchain.document_loaders import TextLoader
 
+import pandas as pd
+from ast import literal_eval
+import numpy as np
+import openai
+from openai.embeddings_utils import distances_from_embeddings, cosine_similarity
+
 # Load API key from config.ini
 config = configparser.ConfigParser()
 try:
@@ -35,6 +41,8 @@ conversation = ConversationChain(
    verbose=False
 )
 
+urlsVisited = []
+
 '''chat_with_chatbot() is the entry point to the chatbot logic'''
 def chat_with_chatbot(userPrompt, currentURL, currScreenHTMLContent):
     # Function to extract text from HTML
@@ -49,49 +57,100 @@ def chat_with_chatbot(userPrompt, currentURL, currScreenHTMLContent):
         with open('output_of_screen_grab.txt', 'w') as file:
             file.write(final_text)
         print("Text extraction complete.")
-    def output_first_half_of_file(file_path):
-        # Step 1: Open the file
-        with open(file_path, 'r') as f:
-            # Step 2: Read the content
-            content = f.read()
+
+    # log every URL that the function is being called for:
+    if currentURL not in urlsVisited:
+        urlsVisited.append(currentURL)
+        # so webpage only processed once, the first time
+        
+        # Extract text from HTML
+        extractTextFromHTML()
+    
+        # // process the webpage once
+        # // embedding, tokenization of that webpage
+
+    # // actual searching over the document should be done here, below
+    
+    
+    # Load embeddings
+    df = pd.read_csv('./processed/embeddings.csv', index_col=0)
+    df['embeddings'] = df['embeddings'].apply(literal_eval).apply(np.array)
+    # create_context function
+    def create_context(
+        question, df, max_len=1800, size="ada"
+    ):
+        """
+        Create a context for a question by finding the most similar context from the dataframe
+        """
+
+        # Get the embeddings for the question
+        q_embeddings = openai.Embedding.create(input=question, engine='text-embedding-ada-002')['data'][0]['embedding']
+
+        # Get the distances from the embeddings
+        df['distances'] = distances_from_embeddings(q_embeddings, df['embeddings'].values, distance_metric='cosine')
+
+
+        returns = []
+        cur_len = 0
+
+        # Sort by distance and add the text to the context until the context is too long
+        for i, row in df.sort_values('distances', ascending=True).iterrows():
             
-        # Step 3: Find the halfway point
-        halfway_point = len(content) // 2
-        
-        # Step 4: Slice the string to get the first half
-        first_half = content[:halfway_point]
-        
-        # Step 5: Output the result
-        with open("out_of_screen_grab.txt", "w") as f:
-            f.write(first_half)
+            # Add the length of the text to the current length
+            cur_len += row['n_tokens'] + 4
+            
+            # If the context is too long, break
+            if cur_len > max_len:
+                break
+            
+            # Else add it to the text that is being returned
+            returns.append(row["text"])
 
-    file_path = "output_of_screen_grab.txt"
-    output_first_half_of_file(file_path)
-    # Extract text from HTML
-    extractTextFromHTML()
+        # Return the context
+        return "\n\n###\n\n".join(returns)
 
-    # Load the document and split it into chunks
-    data = TextLoader('output_of_screen_grab.txt').load()
-    text_splitter = CharacterTextSplitter(separator='\n', chunk_size=2500, chunk_overlap=40)
-    docs = text_splitter.split_documents(data)
-    
-    # Create OpenAI embeddings and a Chroma vector database
-    openai_embeddings = OpenAIEmbeddings()
-    vectordb = Chroma.from_documents(documents=docs, embedding=openai_embeddings)
-    
-    # Set up retriever
-    retriever = vectordb.as_retriever(search_kwargs={"k": 3})
-    
-    # Initialize the ChatOpenAI model
-    llm = ChatOpenAI(model_name='gpt-3.5-turbo-16k-0613')
-    
-    # Create a RetrievalQA chain
-    qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
-    
-    # Generate and return the response
-    response = qa(userPrompt)
-    answer  = response["result"]
-    
+    # answer_question function
+    def answer_question(
+        df,
+        model="text-davinci-003",
+        question=" ",
+        max_len=1800,
+        size="ada",
+        debug=False,
+        max_tokens=500,
+        stop_sequence=None
+    ):
+        """
+        Answer a question based on the most similar context from the dataframe texts
+        """
+        context = create_context(
+            question,
+            df,
+            max_len=max_len,
+            size=size,
+        )
+        # If debug, print the raw model response
+        if debug:
+            print("Context:\n" + context)
+            print("\n\n")
+
+        try:
+            # Create a completions using the questin and context
+            response = openai.Completion.create(
+                prompt=f"Answer the question based on the context below, and if the question can't be answered based on the context, say \"I don't know\"\n\nContext: {context}\n\n---\n\nQuestion: {question}\nAnswer:",
+                temperature=0,
+                max_tokens=max_tokens,
+                top_p=1,
+                frequency_penalty=0,
+                presence_penalty=0,
+                stop=stop_sequence,
+                model=model,
+            )
+            return response["choices"][0]["text"].strip()
+        except Exception as e:
+            print(e)
+            return ""
+        
+    answer = answer_question(df, question=userPrompt, debug=False)
     return answer
 
-### PROGRESS: currently taking the output grab and halving it, then training on that.

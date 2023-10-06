@@ -88,11 +88,11 @@ def answer_question(
         print(e)
         return ""
 
-# # Interactive prompt or other logic
-# while True:
-#     question = input("Ask a question: ")
-#     answer = answer_question(df, question=question, debug=False)
-#     print(f"Answer: {answer}")
+# Interactive prompt or other logic
+while True:
+    question = input("Ask a question: ")
+    answer = answer_question(df, question=question, debug=False)
+    print(f"Answer: {answer}")
 def askPrompter(ques):
     # Define OpenAI api_key
     openai.api_key = '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'

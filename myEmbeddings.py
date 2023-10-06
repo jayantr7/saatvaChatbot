@@ -95,7 +95,7 @@ def get_domain_hyperlinks(local_domain, url):
 
         # If the link is not a URL, check if it is a relative link
         else:
-            if link.startswith("/mattresses/"):
+            if link.startswith("/"):
                 clean_link = "https://" + local_domain + link
 
         if clean_link is not None:

@@ -23,6 +23,8 @@ import numpy as np
 import openai
 from openai.embeddings_utils import distances_from_embeddings, cosine_similarity
 
+
+######################################
 # Load API key from config.ini
 config = configparser.ConfigParser()
 try:
@@ -43,8 +45,30 @@ conversation = ConversationChain(
 
 urlsVisited = []
 
-'''chat_with_chatbot() is the entry point to the chatbot logic'''
+memoryInitialization = []
+
+# Initialize the global memory object
+memory = ConversationBufferMemory()
+
+# Define ConversationBufferMemory class
+class ConversationBufferMemory:
+    def __init__(self):
+        self.conversation = []
+        
+    def add_message(self, sender, message):
+        self.conversation.append({'sender': sender, 'message': message})
+        
+    def get_conversation(self):
+        return self.conversation
+
+# Entry point to the chatbot logic
 def chat_with_chatbot(userPrompt, currentURL, currScreenHTMLContent):
+    if len(memoryInitialization) == 0:
+        # Initialize the global memory object
+        memory = ConversationBufferMemory()
+        memoryInitialization.append("something")
+    else:
+        pass
     # Function to extract text from HTML
     def extractTextFromHTML():
         with open('screen_grab.txt', 'r') as file:
@@ -58,27 +82,22 @@ def chat_with_chatbot(userPrompt, currentURL, currScreenHTMLContent):
             file.write(final_text)
         print("Text extraction complete.")
 
-    # log every URL that the function is being called for:
+    # Log every URL that the function is being called for
     if currentURL not in urlsVisited:
         urlsVisited.append(currentURL)
-        # so webpage only processed once, the first time
         
         # Extract text from HTML
         extractTextFromHTML()
     
-        # // process the webpage once
-        # // embedding, tokenization of that webpage
-
-    # // actual searching over the document should be done here, below
-    
-    
     # Load embeddings
     df = pd.read_csv('./processed/embeddings.csv', index_col=0)
     df['embeddings'] = df['embeddings'].apply(literal_eval).apply(np.array)
-    # create_context function
-    def create_context(
-        question, df, max_len=1800, size="ada"
-    ):
+
+    # Save the user's message to memory
+    memory.add_message('user', userPrompt)
+    
+    # Create context function
+    def create_context(question, df, max_len=1800, size="ada"):
         """
         Create a context for a question by finding the most similar context from the dataframe
         """
@@ -105,11 +124,15 @@ def chat_with_chatbot(userPrompt, currentURL, currScreenHTMLContent):
             
             # Else add it to the text that is being returned
             returns.append(row["text"])
-
-        # Return the context
-        return "\n\n###\n\n".join(returns)
-
-    # answer_question function
+        
+        # Get the current conversation from memory
+        conversation_context = memory.get_conversation()
+        
+        # Prepend conversation context to the returned context
+        conversation_text = "\n".join([f"{entry['sender']}: {entry['message']}" for entry in conversation_context])
+        return conversation_text + "\n\n###\n\n" + "\n\n###\n\n".join(returns)
+        
+    # Answer question function
     def answer_question(
         df,
         model="text-davinci-003",
@@ -120,9 +143,6 @@ def chat_with_chatbot(userPrompt, currentURL, currScreenHTMLContent):
         max_tokens=500,
         stop_sequence=None
     ):
-        """
-        Answer a question based on the most similar context from the dataframe texts
-        """
         context = create_context(
             question,
             df,
@@ -146,11 +166,17 @@ def chat_with_chatbot(userPrompt, currentURL, currScreenHTMLContent):
                 stop=stop_sequence,
                 model=model,
             )
-            return response["choices"][0]["text"].strip()
         except Exception as e:
             print(e)
             return ""
         
+        return response["choices"][0]["text"].strip()
+        
     answer = answer_question(df, question=userPrompt, debug=False)
+    
+    # Save the bot's answer to memory
+    memory.add_message('bot', answer)
+    
     return answer
+
 

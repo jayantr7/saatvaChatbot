@@ -16,37 +16,53 @@ document.addEventListener("DOMContentLoaded", function() {
     var userMessage = userInput.value;
     conversation.innerHTML += `<div class="user-message"><span class="user-label"><strong>User:</strong></span> ${userMessage}</div>`;
     userInput.value = "";
-
+  
     // Scroll to the bottom
     conversation.scrollTop = conversation.scrollHeight;
-
+  
+    // Create and append typing indicator to conversation
+    var typingIndicator = document.createElement('div');
+    typingIndicator.id = 'typing-indicator';
+    typingIndicator.innerHTML = '<span><strong>SaatvaAI:</strong> is typing...</span>';
+    conversation.appendChild(typingIndicator);
+  
+    // Scroll to show typing indicator
+    conversation.scrollTop = conversation.scrollHeight;
+  
     // Get the URL of the active tab
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       console.log("Inside chrome.tabs.query");  // Debugging line
       var activeTab = tabs[0];
       var activeTabURL = activeTab.url;
       console.log("Active tab URL:", activeTabURL);  // Debugging line
-
+  
       chrome.scripting.executeScript({
         target: {tabId: activeTab.id},
         function: grabContent
       }, (results) => {
         var screenGrab = results[0].result;
-
+  
         var messageObject = {
           conversation: userMessage,
           url: activeTabURL,
           screenGrab: screenGrab
         };
-
+  
         chat_with_chatbot(messageObject, function(chatbotResponse) {
+          // Remove typing indicator
+          conversation.removeChild(typingIndicator);
+  
+          // Append chatbot's reply to conversation
           conversation.innerHTML += `<div class="chatbot-message"><span class="chatbot-label"><strong>SaatvaAI:</strong></span> ${chatbotResponse}</div>`;
+          
           // Scroll to the bottom again
           conversation.scrollTop = conversation.scrollHeight;
         });
       });
     });
   });
+  
+  
 
   function chat_with_chatbot(messageObject, callback) {
     console.log("Inside chat_with_chatbot");  // Debugging line

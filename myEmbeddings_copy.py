@@ -149,7 +149,8 @@ def crawl(url):
                 soup = BeautifulSoup(requests.get(url).text, "html.parser")
 
                 # Get the text but remove the tags
-                text = soup.get_text()
+                text = str("WEBPAGE: "+ str(url)+ "\n")
+                text = text + soup.get_text()
 
                 # If the crawler gets to a page that requires JavaScript, it will stop the crawl
                 if ("You need to enable JavaScript to run this app." in text):
@@ -159,6 +160,7 @@ def crawl(url):
                 f.write(text)
         except Exception as e:
             print("Unable to parse page " + url)
+            print(e)
 
         # Get the hyperlinks from the URL and add them to the queue
         for link in get_domain_hyperlinks(local_domain, url):
@@ -225,7 +227,7 @@ df.n_tokens.hist()
 ### Step 8
 ################################################################################
 
-max_tokens = 500
+max_tokens = 2000
 
 # Function to split the text into chunks of a maximum number of tokens
 def split_into_many(text, max_tokens = max_tokens):
@@ -356,7 +358,7 @@ def answer_question(
     max_len=1800,
     size="ada",
     debug=False,
-    max_tokens=500,
+    max_tokens=1000,
     stop_sequence=None
 ):
     """

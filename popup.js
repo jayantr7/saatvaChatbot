@@ -42,12 +42,12 @@ document.addEventListener("DOMContentLoaded", function() {
         target: {tabId: activeTab.id},
         function: grabContent
       }, (results) => {
-        var screenGrab = results[0].result;
+        //var screenGrab = results[0].result;
   
         var messageObject = {
           conversation: userMessage,
           url: activeTabURL,
-          screenGrab: screenGrab
+          //screenGrab: screenGrab
         };
   
         chat_with_chatbot(messageObject, function(chatbotResponse) {
@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function grabContent() {
-  return document.body.innerHTML;
+  //return document.body.innerHTML;
 }
 
 function scrollToBottom() {
